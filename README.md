@@ -344,7 +344,7 @@ Snowsight is Snowflake's modern web-based UI. It's where you run SQL, manage obj
 
 #### Agent Details:
 
-For information about the agent configuration, see: Snowflake Agent Config Reference[Snowflake Agent Config Reference](https://github.com/kellykohlleffel/Snowflake-SKO-FY27-HOL/blob/main/reference_docs/snowflake_agent_config.md)
+For information about the agent configuration, see: [Snowflake Agent Config Reference](https://github.com/kellykohlleffel/Snowflake-SKO-FY27-HOL/blob/main/reference_docs/snowflake_agent_config.md)
 
 You can interact with two preconfigured Cortex Agents in this lab, each demonstrating a different approach to semantic integration:
 
