@@ -1,2 +1,378 @@
-# dbt_cortex_hol
-A hands-on lab guide for creating data pipelines suitable for use with AI
+# dbt Labs | Hands-On Lab
+
+Welcome to the dbt Labs Hands-On Lab! In this workshop, you'll transform data into trusted, production-ready data products using dbt, how to consume these data products via Snowflake Cortex and see how modern data capabilities like the Fusion engine and dbt State make that process faster, smarter, and more efficient.
+
+This is a **full-stack, end-to-end walkthrough of how modern data teams go from raw data to AI-powered outcomes** — no prior experience with any of these tools is required.
+
+---
+
+# Part 1: Introduction to dbt
+
+## What is dbt?
+
+**dbt** (data build tool) is a transformation framework that lets data teams write modular SQL models, test them, and document them — all in one place. dbt runs *inside* your data warehouse (Snowflake), so no data ever leaves the platform. Think of it as version-controlled, tested, production-grade SQL.
+
+Where Fivetran handles *moving* raw data into Snowflake, dbt handles *transforming* that raw data into clean, trusted data products that analysts, dashboards, and AI tools can rely on.
+
+**What makes dbt different from just writing SQL?**
+- Every model is a reusable, testable building block
+- Data quality tests run automatically alongside your transformations
+- Lineage is tracked from source to output — you always know where data came from and how it is being used
+- Documentation is generated automatically and stays in sync with the code
+- Changes go through version control (Git), just like application software
+
+---
+
+## Step 1: Transform Data with dbt
+
+### 1.1 Register for dbt platform Workshop Account
+
+1. Navigate to the dbt Workshop registration page: https://workshops.us1.dbt.com/workshop/
+2. Fill in the registration form:
+   - **First Name**: Your first name
+   - **Last Name**: Your last name
+   - **Company Email**: Your email address
+   - **Workshop Selection**: Select **Getting Your Data Cortex AI-Ready with Fivetran, Snowflake and dbt** from the dropdown
+   - **Workshop Passcode**: Enter the passcode provided by your instructor
+3. Click **Complete Registration** and wait for the success pop-up. It will include generated dbt Platform credentials for the workshop.
+4. Record these credentials — you may need them to log back in during the lab.
+
+### 1.2a RECOMMENDED PATH Access dbt platform
+1. In dbt platform, locate the **Project dropdown** on the left-hand side
+2. Select **Snowflake Summit (Higher Education)** from the dropdown
+3. Click **Studio** to load dbt Platform
+
+### 1.2b OPTIONAL: Local development with dbt Wizard
+
+#### What is dbt Wizard?
+
+dbt Wizard is an AI agent built from the ground up for the way analytics engineers actually work. Not just code generation, but the entire data lifecycle: asking questions, investigating, understanding, changing, validating, and shipping. It's grounded in real dbt project context: lineage, tests, contracts, and defined metrics. And it's available wherever dbt work actually happens — in the dbt platform and in the CLI for those developing locally.
+
+> **⚠️ Note:** For reasons of time this lab does not support individuals setting up dbt Wizard. You are welcome to use dbt Wizard for development, but setup and configuration is at your own risk. If you have issues with setup, please follow the lab flow within dbt platform.
+
+---
+
+#### 1.2b.1 Clone the lab project repo
+
+1. Open your terminal
+2. Clone the lab project repo:
+```bash
+   git clone https://github.com/dbt-labs/snowflake_sko_hol_2026.git
+```
+3. Navigate into the project directory:
+```bash
+   cd snowflake_sko_hol_2026
+```
+
+> **Note:** This is the same project you've been working with in dbt platform — you now have a local copy to use with dbt Wizard.
+
+---
+
+#### 1.2b.2 Install dbt Wizard
+
+1. In your terminal, run the install command:
+```bash
+   curl -fsSL https://public.staging.cdn.getdbt.com/dbt-wizard/install/install-wizard.sh | sh
+```
+
+---
+
+#### 1.2b.3 Launch dbt Wizard
+
+1. From inside the `snowflake_sko_hol_2026` directory, launch dbt Wizard:
+```bash
+   dbt-wizard
+```
+
+---
+
+#### 1.2b.4 Connect your dbt account
+
+> **⚠️ Note:** If you hit issues setting up dbt Wizard but want to try it out, visit the Fivetran Booth #2313 — pre-configured workstations with dbt Wizard are available!
+
+1. At the welcome screen, press **Enter** to sign in via dbt platform
+2. In the browser window that opens, enter your full name and email, agree to the Acceptable Use Policy, complete the reCAPTCHA, then click **Continue**
+3. Check your inbox for a verification email and click the link to verify your address
+4. Back in the terminal, press **Enter** again when prompted
+5. In the browser, scroll to the bottom and click **Sign in**
+6. Sign in with the dbt platform credentials you just created
+7. Complete the two-factor authentication setup — select **Remember for 30 days** when prompted
+
+---
+
+#### 1.2b.5 Start using dbt Wizard
+
+1. Once 2FA is complete, return to the terminal — dbt Wizard is ready to use 🧙
+
+### 1.3 Configure Your Source
+
+> **What are dbt sources?** Sources are how dbt knows where to find your raw data. Instead of hardcoding a table path directly into your SQL, you declare the source once — the database, schema, and table name — and every model that needs it references that declaration. This means if your data ever moves, you update one place and everything downstream stays intact. It also means dbt can test and document your source data the same way it does your models.
+>
+> In this project, the source location is controlled by a variable defined in `dbt_project.yml`. The default value points to the instructor's schema — you'll update it to point to your own Fivetran-synced data.
+
+#### 1.3.1 Open `dbt_project.yml`
+
+1. In the **Project Navigator**, locate and open `dbt_project.yml` at the root of the project
+2. Find the `vars:` block — it will look like this:
+
+```yaml
+vars:
+  source_schema: 'LUIS_LEON_HIGHER_EDUCATION'
+```
+
+#### 1.3.2 Update the Source Variable
+
+1. Replace `'LUIS_LEON_HIGHER_EDUCATION'` with your own schema name using the format `firstname_lastname_higher_education` — for example:
+
+```yaml
+vars:
+  source_schema: 'jane_doe_higher_education'
+```
+
+2. Save the file
+
+> **Note:** Use lowercase and underscores only. Your schema name should match exactly what you set as the **Destination schema prefix** when you configured your Fivetran connector in Step 1.1.
+
+> **⚠️ Having trouble?** If you run into errors you can't resolve, revert this value back to `'LUIS_LEON_HIGHER_EDUCATION'` to use the instructor's source data and continue the lab without interruption.
+
+#### 1.3.3 Run Your Models
+
+1. In the dbt platform Studio toolbar, run the following command: dbt run
+
+2. Wait for the run to complete
+
+#### 1.3.4 Verify Results in the Run Logs
+
+1. In dbt platform Studio, open the **Run Logs** panel
+2. Confirm that all models completed with a green `OK` or `CREATE TABLE` / `CREATE VIEW` status
+3. Check that the log output references your schema — you should see your `firstname_lastname_higher_education` schema name in the compiled SQL paths, confirming models are now building from your Fivetran-synced data
+
+> **✅ Expected:** All models run successfully and the logs show your personal schema as the source. If you still see `LUIS_LEON_HIGHER_EDUCATION` in the paths, double-check that you saved `dbt_project.yml` and rerun.
+
+### 1.4 Build Faster with Fusion
+
+> **What is Fusion?** Fusion is dbt's next-generation execution engine, built directly into dbt platform Studio. Unlike a traditional SQL editor, Fusion understands the structure of your entire dbt project as you type — it knows which models exist, which columns they contain, and how they relate to each other. This means it can surface errors, preview intermediate results, and provide column-level context *before* you ever run a job.
+
+This is a great place to get oriented in the dbt platform Studio IDE before we start building. You'll explore the project structure and see how Fusion makes working in dbt faster and safer than writing SQL in a traditional editor.
+
+#### 1.4.1 Explore IntelliSense
+
+The `vw_hed_data_quality` model is a great place to see Fusion's IntelliSense in action. It calculates a composite data quality score for student records by combining multiple upstream checks — making it easy to trace exactly where each component of the score comes from.
+
+1. In the **Project Navigator**, open `models/hed/marts/vw_hed_data_quality.sql`
+2. In the editor, hover over any column reference used in the composite score calculation — Fusion displays the column's data type and description inline, pulled directly from the upstream model that defines it
+3. Click on a `ref()` call referencing an upstream model — Fusion lets you trace lineage directly, showing you which model and column the data flows from
+4. Begin typing a column name in the editor — notice how Fusion suggests only valid column names from the models referenced in this file, preventing typos before they become errors
+
+> **Note:** This is IntelliSense — the same kind of intelligent code completion used in modern software development tools, now applied to your dbt SQL. Instead of guessing column names or jumping between files, Fusion surfaces the full context of your data model as you write.
+
+#### 1.4.2 See Real-Time Error Detection
+
+1. In `vw_hed_data_quality.sql`, find any line that references an upstream model using `ref()`
+2. Temporarily change the model name to something invalid — add a typo, such as changing `ref('stg_hed_records')` to `ref('stg_hed_recordz')`
+3. Observe how Fusion immediately highlights the invalid reference with an error indicator — **without running the model**
+4. Revert the change back to the correct model name
+
+> **Note:** In a traditional SQL workflow, this error would only surface after a full job run — potentially minutes later, and after consuming warehouse compute. Fusion catches it instantly at the editor level.
+
+#### 1.4.3 Preview a CTE
+
+1. Still in `vw_hed_data_quality.sql`, locate one of the CTEs (the `WITH` blocks at the top of the file)
+2. Click on the CTE name to place your cursor inside it
+3. Click the **Preview** button in the editor toolbar
+4. Review the intermediate output of that CTE — you're seeing the partial results of one component of the composite data quality score, without running the full model
+
+> **✅ Expected:** A preview table appears showing the rows produced by that CTE. This is especially useful in a model like `vw_hed_data_quality` where multiple upstream checks feed into a single composite score — you can validate each component independently before running the full build.
+
+### 1.5 Generate Tests with dbt Wizard (formerly known as Copilot)
+
+dbt Wizard is dbt's AI assistant, powered by a dbt-native agent that understands your project structure, your models, and how dbt works. You'll use it here to automatically generate and run data quality tests for the `vw_hed_data_quality` model. dbt Wizard is available within dbt platform and for local development via a CLI agent.
+
+1. In the **Project Navigator**, locate and open `vw_hed_data_quality.sql`
+2. Open the **dbt Wizard** panel in dbt Platform Studio
+3. In the dbt Wizard prompt, type a request such as:
+   > *"Generate data quality tests for the vw_hed_data_quality model"*
+
+> **⚠️ Note:** dbt Wizard not only writes tests appropriately, but follows the same validation workflow you would expect of an analytics engineer. Notice that Wizard runs `dbt test` rather than `dbt build`. Wizard understands the difference — `dbt build` would rebuild the model *and* run tests, consuming unnecessary warehouse compute. Since the model already exists and we only want to validate it, `dbt test` is the correct and more efficient command. Wizard makes this call automatically.
+
+> **✅ Expected:** All generated tests pass, confirming the data in `vw_hed_data_quality` meets the quality rules Wizard defined. Any failures would surface specific rows or columns that don't meet the expected constraints.
+
+### 1.6 Save and Commit Changes
+
+1. Locate the **Git Integration button** in the top-left corner of dbt platform
+2. Click the **Git Integration button** to commit and sync your changes
+3. Follow the prompts to commit your work
+4. Click to open a pull request in GitHub
+5. Review the PR (no need to merge — lab changes won't be merged into the main branch)
+
+**Note:** This step demonstrates the git workflow built into dbt platform. In a real production environment, all model changes go through a PR review process before being promoted — the same engineering discipline used in software development.
+
+### 1.7 Explore dbt Packages Configuration
+
+1. In the **Project Navigator** (left sidebar), locate and open the `packages.yml` file
+2. Review the file contents and note how the `snowflake_semantic_view` package is defined
+   - This package enables dbt to create Snowflake Semantic Views
+3. For more on this package, see: https://hub.getdbt.com/Snowflake-Labs/dbt_semantic_view/latest/
+
+**Understanding Package Management:**
+
+- When adding new packages, run `dbt deps` to install dependencies
+- This command creates or updates `package-lock.yml`, which records specific package versions
+- The lock file prevents compatibility issues when collaborating with other users
+
+### 1.8 Examine and Run dbt Models
+
+This project showcases two complementary approaches to defining semantic meaning on top of your data — both supported natively by dbt.
+
+**Approach 1: Snowflake Semantic Views**
+The `models/hed/marts/sv_hed_at_risk_students.sql` model creates a Snowflake Semantic View — a native Snowflake object that adds a business-friendly layer directly inside Snowflake. It labels columns, defines metrics (called "facts"), and categorizes attributes (called "dimensions"). This is what powers Cortex AI's ability to understand and query your student retention data using natural language later in the lab.
+
+**Approach 2: dbt Semantic Layer**
+dbt also has its own semantic and metric layer, defined using YAML-based metric files within the project. Open `models/hed/marts/schema.yml` in the **Project Navigator** to see an example — this file defines structured metrics on top of the HED engagement data (things like engagement rates, login activity, and risk distributions) using dbt's MetricFlow framework.
+
+The key difference: Snowflake Semantic Views live inside Snowflake and are consumed by Snowflake-native tools like Cortex Analyst. dbt Semantic Layer metrics are defined and governed within dbt itself, making them accessible to any downstream tool that connects via the **dbt MCP server** — including AI agents, BI tools, and coding assistants like Claude and Cortex. When a tool connects to the dbt MCP server, it can query these metrics directly using natural language or structured requests, with dbt handling the SQL generation and ensuring metric definitions stay consistent across every consumer — including Snowflake Cortex Agents, other AI agents, BI tools, and coding assistants like Claude.
+
+1. In the **Project Navigator**, expand the `models` folder
+2. Expand the `HED` subfolder, then expand the `semantic_models` subfolder inside it
+3. Open `sv_hed_at_risk_students.sql` and review the Snowflake Semantic View definition
+4. Select `sv_hed_at_risk_students.sql` and click the **Run +model (Upstream)** button to build the semantic view and its upstream dependencies in your local Dev schema
+5. Wait for the model to complete successfully
+
+> **✅ Expected:** You should see a green success status for `sv_hed_at_risk_students` and its upstream model `vw_hed_retention_risk_analysis`.
+
+### 1.9 Run a Production dbt Job
+
+1. In the left-hand menu, navigate to **Orchestration > Jobs**
+2. Locate and select the preconfigured **Prod Job** (running in the **Prod Environment**)
+3. Click **Settings** in the top right, then click **Edit**
+4. Confirm the execution command is set to `dbt build`
+5. Ensure **Generate docs on run** is checked
+6. Click **Save** in the top right to save your changes
+7. Navigate back to the **Job Overview** page using the top navigation
+8. Click **Run Now** to execute the job
+9. Wait for the job to complete successfully
+
+> **✅ Expected:** All HED models build successfully, including `vw_hed_retention_risk_analysis` and `sv_hed_at_risk_students`. You'll see green checkmarks next to each model in the run logs.
+
+---
+
+### 1.10 dbt State
+
+> **What is dbt State?** By default, every time a dbt job runs it rebuilds *every* model from scratch — even if the underlying source data hasn't changed. dbt State changes this behavior. dbt compares the current state of your source data against the last known state, and skips rebuilding any model whose inputs haven't changed. This means you only pay for warehouse compute on models that actually need to run — and your jobs complete faster.
+
+#### 1.10.1 Enable Fusion Cost Optimization Features
+
+1. Navigate to **Orchestration > Jobs** and open the **Prod Job**
+2. Click **Settings**, then **Edit**
+3. Locate the **Enable Fusion cost optimization features** toggle and turn it **ON**
+4. Confirm both sub-options are enabled:
+   - ✅ **dbt State orchestration** — dbt will skip models whose inputs haven't changed since the last run
+   - ✅ **Efficient testing** — dbt will skip tests on models that were skipped, avoiding unnecessary test compute
+5. Under **Advanced Settings**, locate the **Compare Changes** setting and set it to **Environment**
+6. In the environment dropdown that appears, select your **Production** environment (the environment you used in Step 2.8) — this tells dbt to compare the current run against the last successful production run when determining what to skip
+7. Click **Save**
+
+#### 1.10.2 What Happens on Run #1
+
+This is the first execution with Fusion cost optimization enabled. Because there is no previous production run state to compare against yet, dbt has no baseline — it treats everything as new and builds all models from scratch.
+
+**What you'll see:** All models execute with `CREATE` or `OK` status in the run logs. This is your **baseline run** — dbt records the current state of your data so it can make smart skip decisions on every subsequent run.
+
+#### 1.10.3 Execute Run #1
+
+1. Navigate to the **Prod Job Overview** page
+2. Click **Run Now**
+3. Watch the run logs as the job executes — all models should build
+4. Note the total run time displayed when the job completes
+
+> **✅ Expected:** All models execute successfully. Note the run time — you'll compare this to Run #2.
+
+#### 1.10.4 What Happens on Run #2
+
+No new data has been loaded since Run #1 — the Fivetran sync has not run again, so `hed_records` is unchanged.
+
+When you trigger the job a second time, dbt compares the current state of the source data against the baseline recorded in Run #1. Because nothing has changed, dbt determines there is nothing new to build and **skips every downstream model**. With efficient testing also enabled, tests on skipped models are skipped too — no unnecessary warehouse compute is used at all.
+
+**What you'll see:** All models show `SKIP` status in the run logs. The job completes in seconds rather than minutes and with no warehouse compute.
+
+#### 1.10.5 Execute Run #2
+
+1. Click **Run Now** again on the **Prod Job Overview** page
+2. Watch the run logs carefully — compare what you see to Run #1
+
+> **✅ Expected:** All models are skipped. The total run time should be a fraction of Run #1's time, and zero Snowflake compute is consumed on model execution or testing.
+
+#### 1.10.6 Reflect
+
+Take a moment to consider what just happened:
+
+- **Run #1** built everything from scratch — this is the full cost of a traditional dbt job on every run, regardless of whether data changed
+- **Run #2** completed in seconds with no compute consumed on transformations or tests — this is the value of Fusion cost optimization
+
+In a real production environment where dbt jobs run on a schedule (hourly, daily), this means you're only paying for warehouse compute when data has actually changed. For large projects with hundreds of models, that's a significant reduction in both cost and job runtime.
+
+---
+## Step 2: Interact with this Data from Cortex
+
+Now that dbt has created a clean semantic layer, you'll build an AI agent on top of it. This section walks you through every step of creating the agent from scratch.
+
+#### What is Snowflake Cortex?
+
+Snowflake Cortex is Snowflake's suite of built-in AI and ML capabilities. It runs entirely inside Snowflake — no data leaves the platform, no external APIs are needed. Key components we'll use today:
+
+Cortex Analyst: Lets users ask natural language questions about their data. You point it at a Semantic View and it automatically translates questions like "Which students have critical retention risk?" into SQL and returns results.
+Cortex Agents: Orchestration layer that combines Cortex Analyst with custom functions, giving the AI the ability to both answer questions and take actions (like routing an alert).
+Snowflake Intelligence: A hosted chat interface at ai.snowflake.com where end users can interact with Cortex Agents without writing any code.
+
+#### What is a Semantic View?
+
+A Semantic View is a special Snowflake object that sits on top of your regular data tables or views. It adds a business-friendly layer of meaning — labeling columns, adding descriptions, defining metrics (called "facts"), and categorizing attributes (called "dimensions"). Cortex Analyst reads the Semantic View to understand your data and translate natural language questions into accurate SQL.
+
+Think of it as giving the AI a map of your data: what every column means, what values are valid, and what filters make sense.
+
+#### What is the dbt MCP Server?
+
+The dbt MCP Server is an alternative approach to making your semantic definitions available to AI — including Cortex Agents. Instead of defining a Snowflake Semantic View, you expose the dbt Semantic Layer directly through the MCP (Model Context Protocol) standard. Any AI tool that supports MCP can connect to the dbt MCP Server and query your metrics, dimensions, and entities using natural language — with dbt handling the SQL generation and ensuring definitions stay consistent across every consumer.
+
+Snowflake Cortex supports this through its **Cortex Connector** functionality. When a Cortex Agent is configured with a Cortex Connector pointed at the dbt MCP Server, it can answer data questions by querying the dbt Semantic Layer directly — no Snowflake Semantic View required. This means the same metric definitions you govern in dbt become available to Cortex Agents, BI tools, coding assistants like Claude, and any other MCP-compatible AI, all from a single source of truth.
+
+> **Note:** This lab demonstrates both approaches side by side. The `HED_STUDENT_SUCCESS_AGENT_LAB` agent reads from a **Snowflake Semantic View** — the native Snowflake path. The `HED_GENERAL_PURPOSE_AGENT_LAB` agent reads from the **dbt MCP Server** via a Cortex Connector — the dbt-native path. Both agents answer questions about the same underlying data; the difference is where the semantic definitions live and how the agent accesses them.
+
+#### What is Snowflake Snowsight?
+
+Snowsight is Snowflake's modern web-based UI. It's where you run SQL, manage objects, and — as of recent releases — create and manage AI Agents. You'll access it using the Snowflake account URL and credentials provided on your lab credentials page.
+
+#### Agent Details:
+
+For information about the agent configuration, see: Snowflake Agent Config Reference
+
+You can interact with two preconfigured Cortex Agents in this lab, each demonstrating a different approach to semantic integration:
+
+| Agent | Semantic Source | Approach |
+|---|---|---|
+| `HED_STUDENT_SUCCESS_AGENT_LAB` | Snowflake Semantic View | Native Snowflake semantic layer |
+| `HED_GENERAL_PURPOSE_AGENT_LAB` | dbt MCP Server | dbt Semantic Layer via Cortex Connector |
+
+Access Options:
+
+- Option 1: Snowflake Intelligence - ai.snowflake.com
+- Option 2: Snowflake Account Direct Access - Log in to your Snowflake account
+
+Use credentials from the lab credentials page for either access method
+
+#### 2.1 Access the Cortex Agents
+
+Choose your preferred access method (Snowflake Intelligence or direct Snowflake login)
+Log in using credentials from the lab credentials page
+Locate either the `HED_STUDENT_SUCCESS_AGENT_LAB` or `HED_GENERAL_PURPOSE_AGENT_LAB` agent — or try both to compare how each approach responds
+
+#### You can now ask questions about:
+
+- Student retention
+- At-risk students
+- Suggested action plans
+
+
+## Need Help?
+
+Ask a lab instructor for assistance.
