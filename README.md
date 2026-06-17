@@ -131,6 +131,12 @@ vars:
 
 > **⚠️ Having trouble?** If you run into errors you can't resolve, revert this value back to `'LUIS_LEON_HIGHER_EDUCATION'` to use the instructor's source data and continue the lab without interruption.
 
+#### 1.3.3 Load Simulated Source Data via dbt Seed
+
+1. Type the command dbt seed in the terminal at the bottom of your dbt project
+
+> **⚠️ Note** dbt seeds are designed to load small reference tables as part of your data pipelines, currency exhange rates, ammount you pay per Snowflake credit etc. Loading source data via dbt seed is an anti-pattern you should not use except for small demo or workshop data sets like this. In a production workflow this data ingest into Snowflake should be done via Fivetran Connectors.
+
 #### 1.3.3 Run Your Models
 
 1. In the dbt platform Studio toolbar, run the following command: dbt run
