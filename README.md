@@ -334,32 +334,14 @@ Snowsight is Snowflake's modern web-based UI. It's where you run SQL, manage obj
 
 For information about the agent configuration, see: [Snowflake Agent Config Reference](https://github.com/kellykohlleffel/Snowflake-SKO-FY27-HOL/blob/main/reference_docs/snowflake_agent_config.md)
 
-You can interact with two preconfigured Cortex Agents in this lab, each demonstrating a different approach to semantic integration:
+For more information about the MCP Connector configuraiton see [MCP Connector Quickstart](https://github.com/luisleon90/dbt_snowflake_mcp_connector_quickstart)
+
+This lab walks through two Cortex Agents, each demonstrating a different approach to semantic integration:
 
 | Agent | Semantic Source | Approach |
 |---|---|---|
 | `HED_STUDENT_SUCCESS_AGENT_LAB` | Snowflake Semantic View | Native Snowflake semantic layer |
 | `HED_GENERAL_PURPOSE_AGENT_LAB` | dbt MCP Server | dbt Semantic Layer via Cortex Connector |
-
-Access Options:
-
-- Option 1: Snowflake Intelligence - ai.snowflake.com
-- Option 2: Snowflake Account Direct Access - Log in to your Snowflake account
-
-Use credentials from the lab credentials page for either access method
-
-#### 2.1 Access the Cortex Agents
-
-Choose your preferred access method (Snowflake Intelligence or direct Snowflake login)
-Log in using credentials from the lab credentials page
-Locate either the `HED_STUDENT_SUCCESS_AGENT_LAB` or `HED_GENERAL_PURPOSE_AGENT_LAB` agent — or try both to compare how each approach responds
-
-#### You can now ask questions about:
-
-- Student retention
-- At-risk students
-- Suggested action plans
-
 
 ## Need Help?
 
