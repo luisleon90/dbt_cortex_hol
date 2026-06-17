@@ -242,76 +242,62 @@ The key difference: Snowflake Semantic Views live inside Snowflake and are consu
 
 > **✅ Expected:** You should see a green success status for `sv_hed_at_risk_students` and its upstream model `vw_hed_retention_risk_analysis`.
 
-### 1.9 Run a Production dbt Job
+---
+
+### 1.9 dbt State
+
+> **What is dbt State?** By default, every time a dbt job runs it rebuilds *every* model from scratch — even if the underlying source data hasn't changed. dbt State changes this behavior. dbt compares the current state of your source data against the last known state, and skips rebuilding any model whose inputs haven't changed. This means you only pay for warehouse compute on models that actually need to run — and your jobs complete faster.
+
+#### 1.9.1 Enable Fusion Cost Optimization Features
+
+1. Navigate to **Project > Make your data AI ready with dbt and Snowflake** this will take you to your project landing page
+2. Click **Start your 20-day free trial** in the banner annoucement **Get started with dbt State**
+3. This will take you to the account Settings, State section. Here click **Start your 30-day free trial** and follow the pop-up prompts, this will enable dbt State at the account level.
+4. Next we will need to turn dbt State on for specific environments or jobs, click the **Enable dbt State** button in the **dbt State** banner to select the environments or jobs where you want to enable dbt State.
+5. In the **By environment** tab check the box next to the Production environment to enable State for all jobs running in Produciton and click the **Enable dbt State** button in the top right. Alternatively with the **By specific jobs** tab dbt State can be enabled for only certain jobs.
+
+#### 1.9.2 What Happens on Run #1
+
+This is the first execution with dbt State enabled. Because there is no previous production run state to compare against yet, dbt has no baseline — it treats everything as new and builds all models from scratch.
+
+**What you'll see:** All models execute with `CREATE` or `OK` status in the run logs. This is your **baseline run** — dbt records the current state of your data so it can make smart skip decisions on every subsequent run.
+
+#### 1.9.3 Execute Run #1
 
 1. In the left-hand menu, navigate to **Orchestration > Jobs**
 2. Locate and select the preconfigured **Prod Job** (running in the **Prod Environment**)
 3. Click **Settings** in the top right, then click **Edit**
 4. Confirm the execution command is set to `dbt build`
-5. Ensure **Generate docs on run** is checked
-6. Click **Save** in the top right to save your changes
 7. Navigate back to the **Job Overview** page using the top navigation
 8. Click **Run Now** to execute the job
 9. Wait for the job to complete successfully
-
-> **✅ Expected:** All HED models build successfully, including `vw_hed_retention_risk_analysis` and `sv_hed_at_risk_students`. You'll see green checkmarks next to each model in the run logs.
-
----
-
-### 1.10 dbt State
-
-> **What is dbt State?** By default, every time a dbt job runs it rebuilds *every* model from scratch — even if the underlying source data hasn't changed. dbt State changes this behavior. dbt compares the current state of your source data against the last known state, and skips rebuilding any model whose inputs haven't changed. This means you only pay for warehouse compute on models that actually need to run — and your jobs complete faster.
-
-#### 1.10.1 Enable Fusion Cost Optimization Features
-
-1. Navigate to **Orchestration > Jobs** and open the **Prod Job**
-2. Click **Settings**, then **Edit**
-3. Locate the **Enable Fusion cost optimization features** toggle and turn it **ON**
-4. Confirm both sub-options are enabled:
-   - ✅ **dbt State orchestration** — dbt will skip models whose inputs haven't changed since the last run
-   - ✅ **Efficient testing** — dbt will skip tests on models that were skipped, avoiding unnecessary test compute
-5. Under **Advanced Settings**, locate the **Compare Changes** setting and set it to **Environment**
-6. In the environment dropdown that appears, select your **Production** environment (the environment you used in Step 2.8) — this tells dbt to compare the current run against the last successful production run when determining what to skip
-7. Click **Save**
-
-#### 1.10.2 What Happens on Run #1
-
-This is the first execution with Fusion cost optimization enabled. Because there is no previous production run state to compare against yet, dbt has no baseline — it treats everything as new and builds all models from scratch.
-
-**What you'll see:** All models execute with `CREATE` or `OK` status in the run logs. This is your **baseline run** — dbt records the current state of your data so it can make smart skip decisions on every subsequent run.
-
-#### 1.10.3 Execute Run #1
-
-1. Navigate to the **Prod Job Overview** page
-2. Click **Run Now**
-3. Watch the run logs as the job executes — all models should build
-4. Note the total run time displayed when the job completes
+10. Note the total run time displayed when the job completes
 
 > **✅ Expected:** All models execute successfully. Note the run time — you'll compare this to Run #2.
 
-#### 1.10.4 What Happens on Run #2
+#### 1.9.4 What Happens on Run #2
 
-No new data has been loaded since Run #1 — the Fivetran sync has not run again, so `hed_records` is unchanged.
+No new data has been loaded since Run #1 — so the `hed_records` source table is unchanged.
 
 When you trigger the job a second time, dbt compares the current state of the source data against the baseline recorded in Run #1. Because nothing has changed, dbt determines there is nothing new to build and **skips every downstream model**. With efficient testing also enabled, tests on skipped models are skipped too — no unnecessary warehouse compute is used at all.
 
-**What you'll see:** All models show `SKIP` status in the run logs. The job completes in seconds rather than minutes and with no warehouse compute.
+**What you'll see:** All models show `Reused` status in the run logs. The job completes in seconds rather than minutes and with no warehouse compute.
 
-#### 1.10.5 Execute Run #2
+#### 1.9.5 Execute Run #2
 
 1. Click **Run Now** again on the **Prod Job Overview** page
 2. Watch the run logs carefully — compare what you see to Run #1
 
 > **✅ Expected:** All models are skipped. The total run time should be a fraction of Run #1's time, and zero Snowflake compute is consumed on model execution or testing.
 
-#### 1.10.6 Reflect
+#### 1.9.6 Reflect
 
 Take a moment to consider what just happened:
 
 - **Run #1** built everything from scratch — this is the full cost of a traditional dbt job on every run, regardless of whether data changed
 - **Run #2** completed in seconds with no compute consumed on transformations or tests — this is the value of Fusion cost optimization
 
-In a real production environment where dbt jobs run on a schedule (hourly, daily), this means you're only paying for warehouse compute when data has actually changed. For large projects with hundreds of models, that's a significant reduction in both cost and job runtime.
+In a real production environment where dbt jobs run on a schedule (hourly, daily), this means you're only paying for warehouse compute when data has actually changed. For large projects with thousands of models, that's a significant reduction in both cost and job runtime.
 
 ---
 ## Step 2: Interact with this Data from Cortex
