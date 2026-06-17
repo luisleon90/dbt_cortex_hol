@@ -131,8 +131,6 @@ vars:
 
 2. Save the file
 
-> **Note:** Use lowercase and underscores only. Your schema name should match exactly what you set as the **Destination schema prefix** when you configured your Fivetran connector in Step 1.1.
-
 > **⚠️ Having trouble?** If you run into errors you can't resolve, revert this value back to `'LUIS_LEON_HIGHER_EDUCATION'` to use the instructor's source data and continue the lab without interruption.
 
 #### 1.3.3 Run Your Models
